@@ -1,0 +1,1 @@
+@start ..\..\bin\keywords\put-iptc.hta "Lonly Black Square.jpg"
