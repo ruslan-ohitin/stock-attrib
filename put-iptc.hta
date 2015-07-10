@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<TITLE>IPTC Данные</TITLE>
+<TITLE>IPTC Р”Р°РЅРЅС‹Рµ</TITLE>
 <HTA:APPLICATION ID="oHTA"
     APPLICATIONNAME="IPTC Data"
     SINGLEINSTANCE="no"
@@ -48,24 +48,24 @@ function getClipboard() {
 
 function getIPTCData(sFileName) {
 
-	// Регулярное выражение для поиска строки, содержащей ключевые слова
+	// Р РµРіСѓР»СЏСЂРЅРѕРµ РІС‹СЂР°Р¶РµРЅРёРµ РґР»СЏ РїРѕРёСЃРєР° СЃС‚СЂРѕРєРё, СЃРѕРґРµСЂР¶Р°С‰РµР№ РєР»СЋС‡РµРІС‹Рµ СЃР»РѕРІР°
 	var re = /^Iptc\.Application2\.(\w+)\s+String\s+\d+\s+(.+)$/;
 	var arr;
 	var lineCount = 0;
-	// Регулярное выражение для разбора строки ключевых слов на отдельные слова
+	// Р РµРіСѓР»СЏСЂРЅРѕРµ РІС‹СЂР°Р¶РµРЅРёРµ РґР»СЏ СЂР°Р·Р±РѕСЂР° СЃС‚СЂРѕРєРё РєР»СЋС‡РµРІС‹С… СЃР»РѕРІ РЅР° РѕС‚РґРµР»СЊРЅС‹Рµ СЃР»РѕРІР°
 	//var rekeywords = /\w+/g;
 	//var arrk;
 
-	// Массив для ключевых слов
+	// РњР°СЃСЃРёРІ РґР»СЏ РєР»СЋС‡РµРІС‹С… СЃР»РѕРІ
 	//var keywordsArray = new Array();
 
-	// Получим IPTC данные файла
+	// РџРѕР»СѓС‡РёРј IPTC РґР°РЅРЅС‹Рµ С„Р°Р№Р»Р°
 	var oExec = WshShell.Exec(progDir + "exiv2.exe -p i \"" + sFileName + "\"");
 	while (! oExec.StdOut.AtEndOfStream) {
-		// Получим следующую строку из вывода команды
+		// РџРѕР»СѓС‡РёРј СЃР»РµРґСѓСЋС‰СѓСЋ СЃС‚СЂРѕРєСѓ РёР· РІС‹РІРѕРґР° РєРѕРјР°РЅРґС‹
 		line = oExec.StdOut.ReadLine();
 		lineCount++;
-		// Это строка описывает ключевые слова?
+		// Р­С‚Рѕ СЃС‚СЂРѕРєР° РѕРїРёСЃС‹РІР°РµС‚ РєР»СЋС‡РµРІС‹Рµ СЃР»РѕРІР°?
 		if ((arr = re.exec(line)) != null) {
 			switch (arr[1]) {
 			case "Caption": 
@@ -82,11 +82,11 @@ function getIPTCData(sFileName) {
 				break;
 			}
 		}
-		// переходим к обработке следующей строки. 
-		// Ключевые слова могут располагаться в нескольких строках.
+		// РїРµСЂРµС…РѕРґРёРј Рє РѕР±СЂР°Р±РѕС‚РєРµ СЃР»РµРґСѓСЋС‰РµР№ СЃС‚СЂРѕРєРё. 
+		// РљР»СЋС‡РµРІС‹Рµ СЃР»РѕРІР° РјРѕРіСѓС‚ СЂР°СЃРїРѕР»Р°РіР°С‚СЊСЃСЏ РІ РЅРµСЃРєРѕР»СЊРєРёС… СЃС‚СЂРѕРєР°С….
 	}
 
-	// Ждем завершения команды
+	// Р–РґРµРј Р·Р°РІРµСЂС€РµРЅРёСЏ РєРѕРјР°РЅРґС‹
 	while (oExec.Status != 1) {
 		//WScript.Sleep(100);
 	}
@@ -118,15 +118,15 @@ function putIPTCData(sFileName) {
 }
 
 function parseClipboard() {
-	// Регулярное выражение для контроля первой строки
-	var re = /^([^\(]+)\(([^\(|^\)]+)\)[^\)]*$/; // Две группы не скобок, вторая в скобках :-)
-	var ok = 0; // Предполагаем, что все плохо.
+	// Р РµРіСѓР»СЏСЂРЅРѕРµ РІС‹СЂР°Р¶РµРЅРёРµ РґР»СЏ РєРѕРЅС‚СЂРѕР»СЏ РїРµСЂРІРѕР№ СЃС‚СЂРѕРєРё
+	var re = /^([^\(]+)\(([^\(|^\)]+)\)[^\)]*$/; // Р”РІРµ РіСЂСѓРїРїС‹ РЅРµ СЃРєРѕР±РѕРє, РІС‚РѕСЂР°СЏ РІ СЃРєРѕР±РєР°С… :-)
+	var ok = 0; // РџСЂРµРґРїРѕР»Р°РіР°РµРј, С‡С‚Рѕ РІСЃРµ РїР»РѕС…Рѕ.
 	var lines = clipboard.value.split("\n");
 	var arr;
 	
-	// В строке 0 - ObjectName (Caption)
-	// В строке 1 - Keywords
-	// В строке 2 - Copyright (не обязательно. Если нет, подставить "Tatyana Okhitina")
+	// Р’ СЃС‚СЂРѕРєРµ 0 - ObjectName (Caption)
+	// Р’ СЃС‚СЂРѕРєРµ 1 - Keywords
+	// Р’ СЃС‚СЂРѕРєРµ 2 - Copyright (РЅРµ РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ. Р•СЃР»Рё РЅРµС‚, РїРѕРґСЃС‚Р°РІРёС‚СЊ "Tatyana Okhitina")
 
 	if (lines.length >= 2) {
 		if ((arr = re.exec(lines[0])) != null) {
@@ -139,7 +139,7 @@ function parseClipboard() {
 			return(1);
 		}
 	}
-	alert("Содержимое буфера обмена не подходит для атрибутирования!");
+	alert("РЎРѕРґРµСЂР¶РёРјРѕРµ Р±СѓС„РµСЂР° РѕР±РјРµРЅР° РЅРµ РїРѕРґС…РѕРґРёС‚ РґР»СЏ Р°С‚СЂРёР±СѓС‚РёСЂРѕРІР°РЅРёСЏ!");
 	return(0);
 }
 
@@ -150,7 +150,7 @@ function onLoad() {
 	argv = extractArgs(oHTA.commandLine);
 	argc = argv.length;
 	if (argc < 2) {
-		alert("Нужен параметр - путь к файлу JPEG");
+		alert("РќСѓР¶РµРЅ РїР°СЂР°РјРµС‚СЂ - РїСѓС‚СЊ Рє С„Р°Р№Р»Сѓ JPEG");
 		self.close();
 	}
 
@@ -170,7 +170,7 @@ function save() {
 	if (putIPTCData(filename.value) == 0) {
 		self.close();
 	} else {
-		alert('Не удалось записать поля IPTC!');
+		alert('РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РїРёСЃР°С‚СЊ РїРѕР»СЏ IPTC!');
 	}
 }
 
@@ -179,21 +179,21 @@ function save() {
 <BODY onLoad="onLoad()" bgcolor="#CCCCCC">
 <table>
 	<tr>
-		<td>Буфер<br>обмена</td>
+		<td>Р‘СѓС„РµСЂ<br>РѕР±РјРµРЅР°</td>
 		<td><textarea name="clipboard" cols="60" rows="6" wrap="soft"></textarea></td>
 	</tr>
 	<tr>
 		<td>&nbsp;</td>
 		<td>
 			<label for="id_parse" accesskey="R">
-			<INPUT TYPE="button" id="id_parse" value="Разобрать (R)" alt="Выделить поля из текста" onClick="parseClipboard()"><br>
+			<INPUT TYPE="button" id="id_parse" value="Р Р°Р·РѕР±СЂР°С‚СЊ (R)" alt="Р’С‹РґРµР»РёС‚СЊ РїРѕР»СЏ РёР· С‚РµРєСЃС‚Р°" onClick="parseClipboard()"><br>
 		</td>
 	</tr>
 	<tr>
 		<td colspan="2"><hr></td>
 	</tr>
 	<tr>
-		<td>Файл</td>
+		<td>Р¤Р°Р№Р»</td>
 		<td>
 			<input type="text" name="filename" size="60" readonly>
 		</td>
@@ -220,8 +220,8 @@ function save() {
 			<br>
 			<LABEL for="id_save" accesskey="S">
 			<LABEL for="id_quit" accesskey="Q">
-			<INPUT TYPE="button" id="id_save" value="Записать и закрыть (S)" onClick="save()">
-			<INPUT TYPE="button" id="id_quit" value="Выйти без изменений (Q)" onClick="javascript:window.close();">
+			<INPUT TYPE="button" id="id_save" value="Р—Р°РїРёСЃР°С‚СЊ Рё Р·Р°РєСЂС‹С‚СЊ (S)" onClick="save()">
+			<INPUT TYPE="button" id="id_quit" value="Р’С‹Р№С‚Рё Р±РµР· РёР·РјРµРЅРµРЅРёР№ (Q)" onClick="javascript:window.close();">
 		</td>
 	</tr>
 </table>
