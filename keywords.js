@@ -1,5 +1,11 @@
 var sWordVector = "vector";
-var sBinPath = "c:\\bin\\keywords";
+
+// Get folder of this script (without trailing backslash)
+var strPath   = WScript.ScriptFullName;
+var objFSO    = new ActiveXObject("Scripting.FileSystemObject");
+var objFile   = objFSO.GetFile(strPath);
+var sBinPath  = objFSO.GetParentFolderName(objFile);
+
 var sPathToExiv2 = sBinPath + "\\exiv2.exe";
 var sPathToIrfanView = sBinPath + "\\i_view32.exe";
 var WshShell = new ActiveXObject("WScript.Shell");
