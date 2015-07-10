@@ -11,8 +11,11 @@ function changeKeywords(sFileName) {
 	var re = /^Iptc\.Application2\.Keywords\s+String\s+\d+\s+(.+)$/;
 	var arr;
 
-	// Регулярное выражение для разбора строки ключевых слов на отдельные слова
-	var rekeywords = /\w+/g;
+	// Regexp to split keywords separated by comma.
+	// Keyword may be a phrase - several words with spaces
+	// Thank you Bennor McCarthy!!!
+	// http://stackoverflow.com/questions/5001554/regular-expression-for-a-list-of-items-separated-by-comma-or-by-comma-and-a-spac
+	var rekeywords = /[^,\s][^\,]*[^,\s]*/g;
 	var arrk;
 
 	// Массив для ключевых слов
