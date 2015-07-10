@@ -1,4 +1,3 @@
-
 var sWordVector = "vector";
 var sBinPath = "c:\\bin\\keywords";
 var sPathToExiv2 = sBinPath + "\\exiv2.exe";
