@@ -1,0 +1,230 @@
+<HTML>
+<HEAD>
+<TITLE>IPTC Данные</TITLE>
+<HTA:APPLICATION ID="oHTA"
+    APPLICATIONNAME="Group IPTC Data"
+    SINGLEINSTANCE="no"
+    NAVIGABLE="no"
+	SCROLLBAR="no"
+>
+<script language="javascript">
+
+var version = "2015-07-13";
+
+var argv,argc;
+var progDir;
+var oFso = new ActiveXObject("Scripting.FileSystemObject");
+var WshShell = new ActiveXObject("WScript.Shell");
+
+function extractArgs(str) { 
+  // by Dan Fabulich Feb 01, 2006; 03:38am
+
+  var matches = str.match(/((?!\"([^"]+)\")\b(\S+)\b|\"([^\"]+)\")/g); 
+  // We either want non quote stuff ([^"]+) surrounded by quotes 
+  // or we want to look-ahead, see that the next character isn't 
+  // a quoted argument, and then grab all the non-space stuff 
+  // this will return for the line: "foo" bar 
+  // the results "\"foo\"" and "bar" 
+
+  // So, let's unquote the quoted arguments: 
+  var args = new Array; 
+  for (var i = 0; i < matches.length; i++) { 
+    args[i] = matches[i]; 
+    args[i] = args[i].replace(/^"(.*)"$/, "$1"); 
+  } 
+  
+  return args; 
+}
+
+function getClipboard() {                  
+	var buff;
+	buff = window.clipboardData.getData("Text");
+	if (buff == null) {
+		return("");
+	} else {
+		return(buff);
+	}
+}
+
+function getIPTCData(sFileName) {
+
+	// Регулярное выражение для поиска строки, содержащей ключевые слова
+	var re = /^Iptc\.Application2\.(\w+)\s+String\s+\d+\s+(.+)$/;
+	var arr;
+	var lineCount = 0;
+	// Регулярное выражение для разбора строки ключевых слов на отдельные слова
+	//var rekeywords = /\w+/g;
+	//var arrk;
+
+	// Массив для ключевых слов
+	//var keywordsArray = new Array();
+
+	// Получим IPTC данные файла
+	var oExec = WshShell.Exec(progDir + "exiv2.exe -p i \"" + sFileName + "\"");
+	while (! oExec.StdOut.AtEndOfStream) {
+		// Получим следующую строку из вывода команды
+		line = oExec.StdOut.ReadLine();
+		lineCount++;
+		// Это строка описывает ключевые слова?
+		if ((arr = re.exec(line)) != null) {
+			switch (arr[1]) {
+			case "Caption": 
+				window.caption.value = arr[2];
+				break;
+			case "ObjectName":
+				window.objectname.value = arr[2];
+				break;
+			case "Keywords":
+				window.keywords.value = arr[2];
+				break;
+			case "Copyright":
+				window.copyright.value = arr[2];
+				break;
+			}
+		}
+		// переходим к обработке следующей строки. 
+		// Ключевые слова могут располагаться в нескольких строках.
+	}
+
+	// Ждем завершения команды
+	while (oExec.Status != 1) {
+		//WScript.Sleep(100);
+	}
+	
+	return(lineCount);
+} // getIPTCData
+
+function putIPTCData(sFileName) {
+
+	var tfolder, tfile, tname, fname, TemporaryFolder = 2;
+	
+	tfolder = oFso.GetSpecialFolder(TemporaryFolder);
+	tname = oFso.GetTempName();
+	
+	tfile = tfolder.CreateTextFile(tname);
+	tfile.writeline("add Iptc.Application2.ObjectName " + objectname.value);
+	tfile.writeline("add Iptc.Application2.Caption " + caption.value);
+	tfile.writeline("add Iptc.Application2.Keywords " + keywords.value);
+	tfile.writeline("add Iptc.Application2.Copyright " + copyright.value);
+	tfile.close();
+	
+	sCmdLine = progDir + "exiv2.exe -m \"" + tfolder.path + "\\" + tname + "\" \"" + sFileName + "\"";
+
+	iRes = WshShell.Run(sCmdLine, 7, true);
+
+	oFso.DeleteFile(tfolder.path + "\\" + tname, true);
+
+	return iRes;
+}
+
+function parseClipboard() {
+	// Регулярное выражение для контроля первой строки
+	var re = /^([^\(]+)\(([^\(|^\)]+)\)[^\)]*$/; // Две группы не скобок, вторая в скобках :-)
+	var ok = 0; // Предполагаем, что все плохо.
+	var lines = clipboard.value.split("\n");
+	var arr;
+	
+	// В строке 0 - ObjectName (Caption)
+	// В строке 1 - Keywords
+	// В строке 2 - Copyright (не обязательно. Если нет, подставить "Tatyana Okhitina")
+
+	if (lines.length >= 2) {
+		if ((arr = re.exec(lines[0])) != null) {
+			objectname.value = arr[1];
+			caption.value = arr[2];
+			keywords.value = lines[1];
+			//if (lines.length = 3) {
+			//	copyright.value = lines[2];
+			//}
+			return(1);
+		}
+	}
+	alert("Содержимое буфера обмена не подходит для атрибутирования!");
+	return(0);
+}
+
+function onLoad() {
+	// Window size
+	self.resizeTo(650, 530);
+	
+	argv = extractArgs(oHTA.commandLine);
+	argc = argv.length;
+	if (argc < 2) {
+		alert("Нужен параметр - путь к файлу JPEG");
+		self.close();
+	}
+
+	progDir = oFso.GetParentFolderName(argv[0]) + "\\";
+
+	window.clipboard.value = getClipboard();
+	if (argc == 2) {
+		window.filename.value = oFso.GetAbsolutePathName(argv[1]);
+		var iCount = getIPTCData(window.filename.value);
+		if (iCount > 0) {
+			document.bgColor = "#FF0F0F";
+		}
+	}
+}
+
+function save() {
+	if (putIPTCData(filename.value) == 0) {
+		self.close();
+	} else {
+		alert('Не удалось записать поля IPTC!');
+	}
+}
+
+</script>
+</HEAD>
+<BODY onLoad="onLoad()" bgcolor="#CCCCCC">
+<table>
+	<tr>
+		<td>Буфер<br>обмена</td>
+		<td><textarea name="clipboard" cols="60" rows="6" wrap="soft"></textarea></td>
+	</tr>
+	<tr>
+		<td>&nbsp;</td>
+		<td>
+			<label for="id_parse" accesskey="R">
+			<INPUT TYPE="button" id="id_parse" value="Разобрать (R)" alt="Выделить поля из текста" onClick="parseClipboard()"><br>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2"><hr></td>
+	</tr>
+	<tr>
+		<td>Файл</td>
+		<td>
+			<input type="text" name="filename" size="60" readonly>
+		</td>
+	</tr>
+	<tr>
+		<td>ObjectName</td>
+		<td><input type="text" name="objectname" size="60"></td>
+	</tr>
+	<tr>
+		<td>Caption</td>
+		<td><input type="text" name="caption" size="60"></td>
+	</tr>
+	<tr>
+		<td>Keywords</td>
+		<td><textarea name="keywords" cols="60" rows="8" wrap="soft"></textarea></td>
+	</tr>
+	<tr>
+		<td>Copyright</td>
+		<td><input type="text" name="copyright" value="Tatyana Okhitina"></td>
+	</tr>
+	<tr>
+		<td>&nbsp;</td>
+		<td>
+			<br>
+			<LABEL for="id_save" accesskey="S">
+			<LABEL for="id_quit" accesskey="Q">
+			<INPUT TYPE="button" id="id_save" value="Записать и закрыть (S)" onClick="save()">
+			<INPUT TYPE="button" id="id_quit" value="Выйти без изменений (Q)" onClick="javascript:window.close();">
+		</td>
+	</tr>
+</table>
+
+</BODY>
+</HTML>
