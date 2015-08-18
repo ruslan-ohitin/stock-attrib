@@ -38,7 +38,22 @@ function extractArgs(str) {
 
 function getClipboard() {                  
 	var buff;
-	buff = window.clipboardData.getData("Text");
+	var readAgain = 1;
+	// Workaround for strange bug
+	// When copy some text from LibreOffice Writer, 
+	// first attempt to get clipboard data fails.
+	// You can read clipboard data untill success.
+	// It needs from 1300 to 13000 times to get correct data!
+	while(readAgain) {
+		try {
+			buff = window.clipboardData.getData("Text");
+			readAgain = 0;
+		} 
+		catch(e) {
+			readAgain = 1
+		}
+	}
+	
 	if (buff == null) {
 		return("");
 	} else {
