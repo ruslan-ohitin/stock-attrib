@@ -1,4 +1,4 @@
-bin/keywords.zip: bin/keywords/keywords.js bin/keywords/put-iptc.hta
+bin/keywords.zip: bin/keywords/keywords.js bin/keywords/put-iptc.hta bin/keywords/put-iptc-group.hta
 	if [ -e bin/keywords-3.zip ]; then rm bin/keywords-3.zip; fi
 	if [ -e bin/keywords-2.zip ]; then mv bin/keywords-2.zip bin/keywords-3.zip; fi
 	if [ -e bin/keywords.zip ];   then mv bin/keywords.zip bin/keywords-2.zip; fi
@@ -9,3 +9,6 @@ bin/keywords/keywords.js: keywords.js
 
 bin/keywords/put-iptc.hta: put-iptc.hta
 	iconv -f UTF-8 -t CP1251 < put-iptc.hta > bin/keywords/put-iptc.hta
+
+bin/keywords/put-iptc-group.hta: put-iptc-group.hta
+	iconv -f UTF-8 -t CP1251 < put-iptc-group.hta > bin/keywords/put-iptc-group.hta
